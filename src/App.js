@@ -1,6 +1,6 @@
-import { DemoRect } from "./demo";
+import Demo from "./demo";
 function App() {
-  return <DemoRect />;
+  return <Demo />;
 }
 
 export default App;
