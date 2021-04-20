@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 
 const ImageMapper = ({ img, map }) => {
-  console.log(map);
   return (
     <>
       <img
