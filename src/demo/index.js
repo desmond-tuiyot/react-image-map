@@ -1,3 +1,3 @@
-import DemoRect from "./DemoRect";
+import Demo from "./Demo";
 
-export { DemoRect };
+export default Demo;
