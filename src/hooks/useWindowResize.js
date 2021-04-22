@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 
-const useWindowResize = (handleWindowResize) => {
+// handleWindowResize is optional - add whatever
+// function you wanna call when window dimensions change
+const useWindowResize = (onWindowResize = (f) => f) => {
   const [dimensions, setDimensions] = useState({
     height: window.innerHeight,
     width: window.innerWidth,
@@ -12,7 +14,7 @@ const useWindowResize = (handleWindowResize) => {
         height: window.innerHeight,
         width: window.innerWidth,
       });
-      handleWindowResize();
+      onWindowResize();
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);

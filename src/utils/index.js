@@ -37,9 +37,19 @@ export const drawCircle = (ctx, shape, scaledCoords = undefined) => {
   ctx.fill();
 };
 
-export const drawAllShapes = (ctxRef, canvas, map, scaledAreas) => {
-  if (!ctxRef.current) return;
-  let ctx = ctxRef.current;
+export const drawShape = (ctx, area, scaledCoords) => {
+  if (area.shape === "rect") {
+    drawRect(ctx, area, scaledCoords);
+  } else if (area.shape === "poly") {
+    drawPoly(ctx, area, scaledCoords);
+  } else if (area.shape === "circle") {
+    drawCircle(ctx, area, scaledCoords);
+  }
+};
+
+export const drawAllShapes = (contextRef, canvas, map, scaledAreas) => {
+  if (!contextRef.current) return;
+  let ctx = contextRef.current;
   ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
   map.areas.forEach((area, index) => {
     let scaledCoords = scaledAreas[index];

@@ -1,4 +1,5 @@
 import useWindowResize from "./useWindowResize";
 import useScaledCoordinates from "./useScaledCoordinates";
+import useDrawShape from "./useDrawShape";
 
-export { useWindowResize, useScaledCoordinates };
+export { useWindowResize, useScaledCoordinates, useDrawShape };

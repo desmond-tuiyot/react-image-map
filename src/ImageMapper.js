@@ -1,70 +1,44 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 
-import * as utils from "./utils";
 import * as styles from "./styles";
-import { useWindowResize, useScaledCoordinates } from "./hooks";
+import { useWindowResize, useScaledCoordinates, useDrawShape } from "./hooks";
 
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
   const [currentShape, setCurrentShape] = useState(null);
-  // const [scaledAreas, setScaledAreas] = useState(null);
   const scaledAreas = useScaledCoordinates(dimensions.width, img.width, map);
   const canvas = useRef();
   const image = useRef();
-  let ctxRef = useRef();
+  let contextRef = useRef();
+  useDrawShape(contextRef, canvas, currentShape, scaledAreas);
 
-  // window gets resized => image gets resized => change dimensions state
-  const handleWindowResize = () => {
+  const updateImageDimensions = () => {
     setDimensions({
       width: image.current.width,
       height: image.current.height,
     });
   };
-  useWindowResize(handleWindowResize);
+  useWindowResize(updateImageDimensions);
   // 3264 x 2176
-
-  // on mouse enter, or leave, currentshape is updated
-  const handleMouseEnter = (area, index) => {
-    setCurrentShape({ id: index, area });
-  };
-
-  const handleMouseLeave = () => {
-    setCurrentShape(null);
-  };
-
-  // when currentshape gets updated, we redraw the canvas -
-  const drawShape = useCallback(() => {
-    if (!ctxRef.current) return;
-    let ctx = ctxRef.current;
-    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
-
-    if (!currentShape) return;
-    let { id, area } = currentShape;
-
-    let scaledCoords = scaledAreas[id];
-    if (area.shape === "rect") {
-      utils.drawRect(ctx, area, scaledCoords);
-    } else if (area.shape === "poly") {
-      utils.drawPoly(ctx, area, scaledCoords);
-    } else if (area.shape === "circle") {
-      utils.drawCircle(ctx, area, scaledCoords);
-    }
-  }, [currentShape, scaledAreas]);
-
-  useEffect(() => {
-    drawShape();
-  }, [drawShape]);
 
   const handleImageLoad = () => {
     // update context ref
-    ctxRef.current = canvas.current.getContext("2d");
+    contextRef.current = canvas.current.getContext("2d");
 
     // set initial dimensions
     setDimensions({
       width: image.current.width,
       height: image.current.height,
     });
+  };
+
+  const handleMouseEnter = (area, index) => {
+    setCurrentShape({ id: index, area });
+  };
+
+  const handleMouseLeave = () => {
+    setCurrentShape(null);
   };
 
   return (
