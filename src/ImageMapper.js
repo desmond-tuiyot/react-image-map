@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import * as utils from "./utils";
 import * as styles from "./styles";
 
-const useWindowResize = () => {
+const useWindowResize = (handleWindowResize) => {
   const [dimensions, setDimensions] = useState({
     height: window.innerHeight,
     width: window.innerWidth,
@@ -16,6 +16,7 @@ const useWindowResize = () => {
         height: window.innerHeight,
         width: window.innerWidth,
       });
+      handleWindowResize();
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -32,17 +33,23 @@ const ImageMapper = ({ img, map }) => {
   const image = useRef();
   let ctxRef = useRef();
 
-  useWindowResize();
+  const handleWindowResize = () => {
+    setDimensions({
+      width: image.current.width,
+      height: image.current.height,
+    });
+  };
+
+  useWindowResize(handleWindowResize);
   // 3264 x 2176
 
   const scaleCoordinates = useCallback(() => {
+    console.log("scaling");
     let ratio = dimensions.width / img.width;
     const scaledAreas = map.areas.map((area) => {
       let coords = area.coords.map((coord) => coord * ratio);
       return coords;
     });
-
-    console.log(scaledAreas);
   }, [dimensions.width, img.width, map.areas]);
 
   const drawShape = useCallback(() => {
