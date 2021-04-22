@@ -1,16 +1,18 @@
 import { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
+import * as utils from "./utils";
+
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
   const canvas = useRef();
   const image = useRef();
-  let ctx = useRef();
+  let ctxRef = useRef();
 
   // 3264 x 2176
 
   useEffect(() => {
-    ctx.current = canvas.current.getContext("2d");
+    ctxRef.current = canvas.current.getContext("2d");
   }, [dimensions]);
 
   let canvasStyles = {
@@ -44,16 +46,24 @@ const ImageMapper = ({ img, map }) => {
   };
 
   const handleMouseEnter = (area) => {
-    if (!canvas.current) return;
+    if (!ctxRef.current) return;
+    let ctx = ctxRef.current;
 
     if (area.shape === "rect") {
-      ctx.current.fillStyle = "rgba(200,0,0,0.4)";
-      let [left, top, right, bottom] = area.coords.split(",");
-      ctx.current.fillRect(left, top, right - left, bottom - top);
+      ctx.fillStyle = "rgba(200,0,0,0.4)";
+      let [x, y, width, height] = utils.getFillRectBounds(area.coords);
+      ctx.fillRect(x, y, width, height);
     }
   };
 
-  const handleMouseLeave = (area) => {};
+  const handleMouseLeave = (area) => {
+    if (!ctxRef.current) return;
+    let ctx = ctxRef.current;
+    if (area.shape === "rect") {
+      let [x, y, width, height] = utils.getFillRectBounds(area.coords);
+      ctx.clearRect(x, y, width, height);
+    }
+  };
 
   return (
     <div style={containerStyle}>
