@@ -1,26 +1,36 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 
 import * as utils from "./utils";
 
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
-  const [shapes, setShapes] = useState([]);
+  const [currentShape, setCurrentShape] = useState(null);
   const canvas = useRef();
   const image = useRef();
   let ctxRef = useRef();
 
   // 3264 x 2176
 
-  // useEffect(() => {
-  //   if (ctxRef.current) {
-  //     const ctx = ctxRef.current;
-  //     ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
-  //     shapes.forEach((area) => {
+  const drawShape = useCallback(() => {
+    if (!ctxRef.current) return;
+    let ctx = ctxRef.current;
+    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
-  //     });
-  //   }
-  // }, [shapes]);
+    if (!currentShape) return;
+
+    if (currentShape.shape === "rect") {
+      utils.drawRect(ctx, currentShape);
+    } else if (currentShape.shape === "poly") {
+      utils.drawPoly(ctx, currentShape);
+    } else if (currentShape.shape === "circle") {
+      utils.drawCircle(ctx, currentShape);
+    }
+  }, [currentShape]);
+
+  useEffect(() => {
+    drawShape();
+  }, [drawShape]);
 
   useEffect(() => {
     ctxRef.current = canvas.current.getContext("2d");
@@ -55,36 +65,12 @@ const ImageMapper = ({ img, map }) => {
     });
   };
 
-  const handleMouseEnter = (event, area, id) => {
-    console.log(event.type);
-    // console.log(utils.updateShapesState(shapes, area, event.type, id));
-    // console.log(event.target);
-    // const newShapes = utils.updateShapesState(shapes, area, event.type, id);
-    // setShapes(newShapes);
-
-    if (!ctxRef.current) return;
-    let ctx = ctxRef.current;
-    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
-    if (area.shape === "rect") {
-      ctx.fillStyle = "rgba(200,0,0,0.4)";
-      let [x, y, width, height] = utils.getFillRectBounds(area.coords);
-      ctx.fillRect(x, y, width, height);
-    } else if (area.shape === "poly") {
-      ctx.fillStyle = "rgba(200,0,0,0.4)";
-      let coords = area.coords.split(",");
-      ctx.beginPath();
-      ctx.moveTo(coords[0], coords[1]);
-      for (let i = 2; i < coords.length; i += 2) {
-        ctx.lineTo(coords[i], coords[i + 1]);
-      }
-      ctx.fill();
-    }
+  const handleMouseEnter = (area) => {
+    setCurrentShape(area);
   };
 
   const handleMouseLeave = () => {
-    if (!ctxRef.current) return;
-    let ctx = ctxRef.current;
-    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
+    setCurrentShape(null);
   };
 
   return (
@@ -107,11 +93,11 @@ const ImageMapper = ({ img, map }) => {
             shape={area.shape}
             coords={area.coords}
             alt={area.alt}
-            onMouseEnter={(event) => {
-              handleMouseEnter(event, area, index);
+            onMouseEnter={() => {
+              handleMouseEnter(area);
             }}
-            onMouseLeave={(event) => {
-              handleMouseLeave(event, area, index);
+            onMouseLeave={() => {
+              handleMouseLeave(area);
             }}
             href="#"
           />
