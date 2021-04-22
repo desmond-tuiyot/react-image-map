@@ -5,11 +5,22 @@ import * as utils from "./utils";
 
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
+  const [shapes, setShapes] = useState([]);
   const canvas = useRef();
   const image = useRef();
   let ctxRef = useRef();
 
   // 3264 x 2176
+
+  // useEffect(() => {
+  //   if (ctxRef.current) {
+  //     const ctx = ctxRef.current;
+  //     ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
+  //     shapes.forEach((area) => {
+
+  //     });
+  //   }
+  // }, [shapes]);
 
   useEffect(() => {
     ctxRef.current = canvas.current.getContext("2d");
@@ -38,31 +49,42 @@ const ImageMapper = ({ img, map }) => {
   };
 
   const handleImageLoad = () => {
-    console.log("called handle image load first");
     setDimensions({
       width: image.current.width,
       height: image.current.height,
     });
   };
 
-  const handleMouseEnter = (area) => {
+  const handleMouseEnter = (event, area, id) => {
+    console.log(event.type);
+    // console.log(utils.updateShapesState(shapes, area, event.type, id));
+    // console.log(event.target);
+    // const newShapes = utils.updateShapesState(shapes, area, event.type, id);
+    // setShapes(newShapes);
+
     if (!ctxRef.current) return;
     let ctx = ctxRef.current;
-
+    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
     if (area.shape === "rect") {
       ctx.fillStyle = "rgba(200,0,0,0.4)";
       let [x, y, width, height] = utils.getFillRectBounds(area.coords);
       ctx.fillRect(x, y, width, height);
+    } else if (area.shape === "poly") {
+      ctx.fillStyle = "rgba(200,0,0,0.4)";
+      let coords = area.coords.split(",");
+      ctx.beginPath();
+      ctx.moveTo(coords[0], coords[1]);
+      for (let i = 2; i < coords.length; i += 2) {
+        ctx.lineTo(coords[i], coords[i + 1]);
+      }
+      ctx.fill();
     }
   };
 
-  const handleMouseLeave = (area) => {
+  const handleMouseLeave = () => {
     if (!ctxRef.current) return;
     let ctx = ctxRef.current;
-    if (area.shape === "rect") {
-      let [x, y, width, height] = utils.getFillRectBounds(area.coords);
-      ctx.clearRect(x, y, width, height);
-    }
+    ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
   };
 
   return (
@@ -85,11 +107,11 @@ const ImageMapper = ({ img, map }) => {
             shape={area.shape}
             coords={area.coords}
             alt={area.alt}
-            onMouseEnter={() => {
-              handleMouseEnter(area);
+            onMouseEnter={(event) => {
+              handleMouseEnter(event, area, index);
             }}
-            onMouseLeave={() => {
-              handleMouseLeave(area);
+            onMouseLeave={(event) => {
+              handleMouseLeave(event, area, index);
             }}
             href="#"
           />

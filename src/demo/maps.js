@@ -14,12 +14,7 @@ export const map = {
         coords: "10,10,40,60",
         onClick: () => {},
       },
-      {
-        alt: "rect3",
-        shape: "rect",
-        coords: "0, 0, 10, 10",
-        onClick: () => {},
-      },
+
       {
         alt: "rect2",
         shape: "rect",
