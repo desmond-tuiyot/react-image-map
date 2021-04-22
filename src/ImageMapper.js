@@ -2,15 +2,48 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 
 import * as utils from "./utils";
+import * as styles from "./styles";
+
+const useWindowResize = () => {
+  const [dimensions, setDimensions] = useState({
+    height: window.innerHeight,
+    width: window.innerWidth,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        height: window.innerHeight,
+        width: window.innerWidth,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  });
+
+  return dimensions;
+};
 
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
   const [currentShape, setCurrentShape] = useState(null);
+  const [scaledCoordinates, setScaledCoordinates] = useState([]);
   const canvas = useRef();
   const image = useRef();
   let ctxRef = useRef();
 
+  useWindowResize();
   // 3264 x 2176
+
+  const scaleCoordinates = useCallback(() => {
+    let ratio = dimensions.width / img.width;
+    const scaledAreas = map.areas.map((area) => {
+      let coords = area.coords.map((coord) => coord * ratio);
+      return coords;
+    });
+
+    console.log(scaledAreas);
+  }, [dimensions.width, img.width, map.areas]);
 
   const drawShape = useCallback(() => {
     if (!ctxRef.current) return;
@@ -33,30 +66,11 @@ const ImageMapper = ({ img, map }) => {
   }, [drawShape]);
 
   useEffect(() => {
-    ctxRef.current = canvas.current.getContext("2d");
-  }, [dimensions]);
-
-  let canvasStyles = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    zIndex: 2,
-    pointerEvents: "none",
-  };
-
-  let containerStyle = {
-    position: "relative",
-    height: `${dimensions.height ? dimensions.height : 150}px`,
-    width: `${dimensions.width ? dimensions.width : 300}px`,
-  };
-
-  let imgStyles = {
-    position: "absolute",
-    userSelect: "none",
-    top: 0,
-    left: 0,
-    zIndex: 1,
-  };
+    if (!ctxRef.current) {
+      ctxRef.current = canvas.current.getContext("2d");
+    }
+    scaleCoordinates();
+  }, [dimensions.width, dimensions.height, scaleCoordinates]);
 
   const handleImageLoad = () => {
     setDimensions({
@@ -74,15 +88,16 @@ const ImageMapper = ({ img, map }) => {
   };
 
   return (
-    <div style={containerStyle}>
+    <div style={styles.container}>
       <img
-        style={imgStyles}
+        style={styles.image}
         ref={image}
         src={img.src}
         alt={img.alt}
         onLoad={handleImageLoad}
         useMap={`#${map.name}`}
-        width={3264}
+        // width={img.width}
+        width="100%"
         height="auto"
       />
 
@@ -108,7 +123,7 @@ const ImageMapper = ({ img, map }) => {
         height={dimensions.height ? dimensions.height : 150}
         id="image map highlights"
         ref={canvas}
-        style={canvasStyles}
+        style={styles.canvas}
       >
         Your browser does not have canvas support. When hovering over an image
         map, the canvas will draw a shape over that image map with a given
