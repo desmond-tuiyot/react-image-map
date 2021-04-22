@@ -28,7 +28,7 @@ const useWindowResize = (handleWindowResize) => {
 const ImageMapper = ({ img, map }) => {
   const [dimensions, setDimensions] = useState({});
   const [currentShape, setCurrentShape] = useState(null);
-  const [scaledCoordinates, setScaledCoordinates] = useState([]);
+  const [scaledAreas, setScaledAreas] = useState(null);
   const canvas = useRef();
   const image = useRef();
   let ctxRef = useRef();
@@ -43,14 +43,16 @@ const ImageMapper = ({ img, map }) => {
   useWindowResize(handleWindowResize);
   // 3264 x 2176
 
-  const scaleCoordinates = useCallback(() => {
-    console.log("scaling");
+  const scaleAreaCoordinates = useCallback(() => {
     let ratio = dimensions.width / img.width;
-    const scaledAreas = map.areas.map((area) => {
+    let oldScaledAreas = [];
+    const newlyScaledAreas = map.areas.map((area, index) => {
+      oldScaledAreas.push([...area.coords]);
       let coords = area.coords.map((coord) => coord * ratio);
       return coords;
     });
-  }, [dimensions.width, img.width, map.areas]);
+    setScaledAreas(newlyScaledAreas);
+  }, [dimensions, img.width, map.areas]);
 
   const drawShape = useCallback(() => {
     if (!ctxRef.current) return;
@@ -58,15 +60,17 @@ const ImageMapper = ({ img, map }) => {
     ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
     if (!currentShape) return;
+    let { id, area } = currentShape;
 
-    if (currentShape.shape === "rect") {
-      utils.drawRect(ctx, currentShape);
-    } else if (currentShape.shape === "poly") {
-      utils.drawPoly(ctx, currentShape);
-    } else if (currentShape.shape === "circle") {
-      utils.drawCircle(ctx, currentShape);
+    let scaledCoords = scaledAreas[id];
+    if (area.shape === "rect") {
+      utils.drawRect(ctx, area, scaledCoords);
+    } else if (area.shape === "poly") {
+      utils.drawPoly(ctx, area, scaledCoords);
+    } else if (area.shape === "circle") {
+      utils.drawCircle(ctx, area, scaledCoords);
     }
-  }, [currentShape]);
+  }, [currentShape, scaledAreas]);
 
   useEffect(() => {
     drawShape();
@@ -76,8 +80,9 @@ const ImageMapper = ({ img, map }) => {
     if (!ctxRef.current) {
       ctxRef.current = canvas.current.getContext("2d");
     }
-    scaleCoordinates();
-  }, [dimensions.width, dimensions.height, scaleCoordinates]);
+
+    scaleAreaCoordinates();
+  }, [dimensions, scaleAreaCoordinates]);
 
   const handleImageLoad = () => {
     setDimensions({
@@ -86,8 +91,8 @@ const ImageMapper = ({ img, map }) => {
     });
   };
 
-  const handleMouseEnter = (area) => {
-    setCurrentShape(area);
+  const handleMouseEnter = (area, index) => {
+    setCurrentShape({ id: index, area });
   };
 
   const handleMouseLeave = () => {
@@ -103,7 +108,6 @@ const ImageMapper = ({ img, map }) => {
         alt={img.alt}
         onLoad={handleImageLoad}
         useMap={`#${map.name}`}
-        // width={img.width}
         width="100%"
         height="auto"
       />
@@ -113,13 +117,13 @@ const ImageMapper = ({ img, map }) => {
           <area
             key={index}
             shape={area.shape}
-            coords={area.coords}
+            coords={scaledAreas ? scaledAreas[index] : area.coords}
             alt={area.alt}
             onMouseEnter={() => {
-              handleMouseEnter(area);
+              handleMouseEnter(area, index);
             }}
             onMouseLeave={() => {
-              handleMouseLeave(area);
+              handleMouseLeave(area, index);
             }}
             href="#"
           />
