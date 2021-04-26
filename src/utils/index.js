@@ -11,30 +11,43 @@ export const drawRect = (ctx, shape, scaledCoords = undefined) => {
 
   let [x, y, width, height] = getFillRectBounds(coords);
 
-  ctx.fillStyle = shape.fill;
+  ctx.fillStyle = shape.fillColor;
+  ctx.strokeStyle = shape.strokeColor;
+  ctx.lineWidth = 10;
+
   ctx.fillRect(x, y, width, height);
+  ctx.strokeRect(x, y, width, height);
 };
 
 export const drawPoly = (ctx, shape, scaledCoords = undefined) => {
   let coords = scaledCoords ? scaledCoords : shape.coords;
 
-  ctx.fillStyle = shape.fill;
+  ctx.fillStyle = shape.fillColor;
+  ctx.strokeStyle = shape.strokeColor;
+  ctx.lineWidth = 10;
+
   ctx.beginPath();
   ctx.moveTo(coords[0], coords[1]);
   for (let i = 2; i < coords.length; i += 2) {
     ctx.lineTo(coords[i], coords[i + 1]);
   }
   ctx.fill();
+  ctx.stroke();
 };
 
 export const drawCircle = (ctx, shape, scaledCoords = undefined) => {
   let coords = scaledCoords ? scaledCoords : shape.coords;
   const [x, y, radius] = coords;
 
-  ctx.fillStyle = shape.fill;
+  ctx.fillStyle = shape.fillColor;
+  ctx.strokeStyle = shape.strokeColor;
+  ctx.lineWidth = 10;
+
   ctx.beginPath();
   ctx.arc(x, y, radius, 0, 2 * Math.PI);
+
   ctx.fill();
+  ctx.stroke();
 };
 
 export const drawShape = (ctx, area, scaledCoords) => {

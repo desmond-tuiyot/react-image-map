@@ -4,7 +4,14 @@ import PropTypes from "prop-types";
 import * as styles from "./styles";
 import { useWindowResize, useScaledCoordinates, useDrawShape } from "./hooks";
 
-const ImageMapper = ({ img, map }) => {
+const ImageMapper = ({
+  img,
+  map,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  onLoad,
+}) => {
   const [dimensions, setDimensions] = useState({});
   const [currentShape, setCurrentShape] = useState(null);
   const scaledAreas = useScaledCoordinates(dimensions.width, img.width, map);
@@ -31,14 +38,21 @@ const ImageMapper = ({ img, map }) => {
       width: image.current.width,
       height: image.current.height,
     });
+    onLoad();
   };
 
   const handleMouseEnter = (area, index) => {
     setCurrentShape({ id: index, area });
+    onMouseEnter();
   };
 
   const handleMouseLeave = () => {
     setCurrentShape(null);
+    onMouseLeave();
+  };
+
+  const handleClick = () => {
+    onClick();
   };
 
   return (
@@ -67,6 +81,7 @@ const ImageMapper = ({ img, map }) => {
             onMouseLeave={() => {
               handleMouseLeave(area, index);
             }}
+            onClick={handleClick}
             href="#"
           />
         ))}
