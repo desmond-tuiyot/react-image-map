@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 // import Demo from "./demo";
 import ImageMapper from "./ImageMapper";

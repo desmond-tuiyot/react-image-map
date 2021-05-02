@@ -3,14 +3,18 @@ import PropTypes from "prop-types";
 
 import * as styles from "./styles";
 import { useWindowResize, useScaledCoordinates, useDrawShape } from "./hooks";
+import { noop } from "./utils";
 
 const ImageMapper = ({
   img,
   map,
-  onClick,
   onMouseEnter,
   onMouseLeave,
+  onMouseMove,
   onLoad,
+  onClick,
+  onImageClick,
+  onImageMousemove,
 }) => {
   const [dimensions, setDimensions] = useState({});
   const [currentShape, setCurrentShape] = useState(null);
@@ -99,6 +103,18 @@ const ImageMapper = ({
       </canvas>
     </div>
   );
+};
+
+ImageMapper.defaultProps = {
+  src: "",
+  map: {},
+  onMouseEnter: noop,
+  onMouseLeave: noop,
+  onLoad: noop,
+  onMouseMove: noop,
+  onClick: noop,
+  onImageClick: noop,
+  onImageMouseMove: noop,
 };
 
 ImageMapper.propTypes = {

@@ -1,5 +1,7 @@
 import produce from "immer";
 
+export const noop = () => {};
+
 // TODO: write unit test for this
 export const getFillRectBounds = (coords) => {
   let [left, top, right, bottom] = coords;
